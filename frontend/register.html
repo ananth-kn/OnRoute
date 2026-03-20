@@ -184,6 +184,7 @@
             }
             else if(!otp.ok){
                 showerror1("Counld'nt send OTP, Try again")
+                hidesuccess1()
                 document.getElementById("sendotp").innerText="Re-send OTP"
             }
             else{
