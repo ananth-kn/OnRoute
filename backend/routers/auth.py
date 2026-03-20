@@ -10,13 +10,12 @@ from config import settings
 from fastapi.templating import Jinja2Templates
 import secrets
 from datetime import datetime, timedelta, timezone
-from config import conf
+from config import conf, r
 import utils
 from fastapi_mail import MessageSchema, FastMail
 import redis.asyncio as redis
 from oauth2 import get_current_tenant
 from config import limiter
-r = redis.Redis(host="localhost", decode_responses=True)
 
 templates = Jinja2Templates(directory="../frontend")
 

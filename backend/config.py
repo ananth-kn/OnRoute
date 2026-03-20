@@ -2,6 +2,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic_settings import BaseSettings
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+import redis.asyncio as redis
 
 limiter = Limiter(key_func=get_remote_address)
 class Settings(BaseSettings):
@@ -15,12 +16,14 @@ class Settings(BaseSettings):
     gmail_app_password: str
     my_gmail_id: str
     my_gmail_name: str
-
+    redis_url:str
     model_config = {
         "env_file": ".env",
         "extra": "forbid"
     }
 settings = Settings()
+
+r = redis.from_url(settings.redis_url, decode_responses=True)
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.my_gmail_name,

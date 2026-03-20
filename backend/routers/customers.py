@@ -8,11 +8,10 @@ from oauth2 import get_current_tenant
 import models, schemas, utils, oauth2
 from typing import List
 from uuid import UUID
-from config import limiter
+from config import limiter, r
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter(prefix="/customers")
-r = redis.Redis(host="localhost")
 templates = Jinja2Templates(directory="../frontend")
 
 @router.get("/{customer_token}", status_code=200)

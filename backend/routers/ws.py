@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Form, File, UploadFile, Depends, WebSocket, WebSocketDisconnect, Request
-import redis.asyncio as redis
+from config import r
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
 from sqlalchemy.exc import IntegrityError, DataError
@@ -11,7 +11,6 @@ from typing import List
 from uuid import UUID
 from fastapi.templating import Jinja2Templates
 router = APIRouter(prefix="/ws")
-r = redis.Redis(host="localhost")
 
 @router.websocket("/deliveries/drivers/{driver_token}")
 async def driver_location(websocket: WebSocket, driver_token: str, db: AsyncSession = Depends(get_db)):
