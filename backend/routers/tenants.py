@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from typing import Optional
 from tasks import driver_link_email, customer_link_email, tenant_email
 from config import limiter
+from fastapi import BackgroundTasks
+
 templates = Jinja2Templates(directory="../frontend")
 
 client = Client(settings.account_sid, settings.auth_token)
@@ -27,7 +29,7 @@ async def driver_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @router.post("/register")
-async def register_tenant(data: schemas.TenantCreate, db: AsyncSession = Depends(get_db)):
+async def register_tenant(background_tasks: BackgroundTasks, data: schemas.TenantCreate, db: AsyncSession = Depends(get_db)):
     rows = (await db.execute(select(models.OTP).where(models.OTP.email == data.email).order_by(models.OTP.created_at.desc()).limit(5))).scalars().all()
     if not rows:
         raise HTTPException(status_code=400, detail="Invalid OTP")
@@ -49,9 +51,8 @@ async def register_tenant(data: schemas.TenantCreate, db: AsyncSession = Depends
         await db.commit()
     except IntegrityError:
         raise HTTPException(status_code=409, detail="Email already exists")
-    tenant_email.delay(data.email)
+    background_tasks.add_task(tenant_email, data.email)
     return JSONResponse(status_code=201, content={"message": "created"})   
-
 
     
 @router.post("/drivers", status_code=201)
@@ -89,7 +90,7 @@ async def deactivate(id: int, data: schemas.DriverUpdate, db: AsyncSession = Dep
     return
 
 @router.post("/deliveries")
-async def create_delivery(data: schemas.DeliveryCreate, db: AsyncSession = Depends(get_db), tenant: dict = Depends(get_current_tenant)):
+async def create_delivery(background_tasks: BackgroundTasks, data: schemas.DeliveryCreate, db: AsyncSession = Depends(get_db), tenant: dict = Depends(get_current_tenant)):
     driver = (await db.execute(select(models.Driver).where(models.Driver.id == data.driver_id).where(models.Driver.tenant_id == tenant.id))).scalars().first()
     if not driver:
         raise HTTPException(status_code=404, detail="Driver does'nt exist")
@@ -98,8 +99,8 @@ async def create_delivery(data: schemas.DeliveryCreate, db: AsyncSession = Depen
     delivery = models.Delivery(**data.model_dump(), tenant_id = tenant.id)
     db.add(delivery)
     await db.commit()
-    driver_link_email.delay(str(driver.email), delivery.driver_token)
-    customer_link_email.delay(str(data.customer_email), delivery.customer_token)
+    background_tasks.add_task(driver_link_email, str(driver.email), delivery.driver_token)
+    background_tasks.add_task(customer_link_email, str(data.customer_email), delivery.customer_token)
     return JSONResponse(status_code=201, content={"message": "created"})   
 
 
