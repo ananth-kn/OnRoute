@@ -82,18 +82,18 @@ async def sendotp(request: Request,
     expires_at = new_otp.created_at + timedelta(minutes=5)
     new_otp.expires_at = expires_at
     await db.commit()
-    try:
-        message = MessageSchema(subject="Your OTP code for verification",recipients=[email.email],
-        body=
-        f"""Your One-Time Password (OTP) is: {otp}
-        This code will expire in 5 minutes.
-        Do not share this code with anyone. 
-        Our team will never ask for your OTP.
-        If you did not request this, please ignore this email."""
-        ,subtype="plain")
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        return {"message": "OTP sent successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+    # try
+    message = MessageSchema(subject="Your OTP code for verification",recipients=[email.email],
+    body=
+    f"""Your One-Time Password (OTP) is: {otp}
+    This code will expire in 5 minutes.
+    Do not share this code with anyone. 
+    Our team will never ask for your OTP.
+    If you did not request this, please ignore this email."""
+    ,subtype="plain")
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    return {"message": "OTP sent successfully"}
+    # except Exception as e:
+    #     raise HTTPException(status_code=503, detail=str(e))
     
