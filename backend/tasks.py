@@ -17,10 +17,10 @@ def send_email(to: str, subject: str, body: str):
         text_content=body
     )
     
-    try:
-        api_instance.send_transac_email(send_smtp_email)
-    except ApiException as e:
-        raise HTTPException(status_code=503, detail=f"Email failed: {str(e)}")
+    # try:
+    api_instance.send_transac_email(send_smtp_email)
+    # except ApiException as e:
+    #     raise HTTPException(status_code=503, detail=f"Email failed: {str(e)}")
      
 async def customer_link_email(to, token):
     subject="Successful registration"
