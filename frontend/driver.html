@@ -24,7 +24,8 @@
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{  maxZoom: 20,  detectRetina: true}).addTo(map)
 const driverIcon = L.icon({iconUrl: "/static/car.png",iconSize: [40, 40],iconAnchor: [20, 40]})
 const marker = L.marker([12.9716, 77.5946], {icon:driverIcon}).addTo(map)
-const socket = new WebSocket(`ws://${window.location.host}/ws/delivery/driver/{{driver_token}}`)
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const socket = new WebSocket(`${protocol}://${window.location.host}/ws/deliveries/customers/${token}`);
 
 let delivery= null
 async function init() {
