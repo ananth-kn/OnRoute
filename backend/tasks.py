@@ -24,12 +24,12 @@ def send_email(to: str, subject: str, body: str):
      
 async def customer_link_email(to, token):
     subject="Successful registration"
-    body=f'Location: localhost:8000/customers/{token}'
+    body=f'Location: https://onroute.onrender.com/customers/{token}'
     send_email(to, subject, body)
 
 async def driver_link_email(to, token):
     subject="Successful registration"
-    body=f'Location: localhost:8000/drivers/map/{token}'
+    body=f'Location: https://onroute.onrender.com/drivers/map/{token}'
     send_email(to, subject, body)
 
 async def tenant_email(to):
