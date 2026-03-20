@@ -95,5 +95,5 @@ async def sendotp(request: Request,
         await fm.send_message(message)
         return {"message": "OTP sent successfully"}
     except Exception as e:
-        raise HTTPException(status_code=503)
+        raise HTTPException(status_code=503, detail=str(e))
     
