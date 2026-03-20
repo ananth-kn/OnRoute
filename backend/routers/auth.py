@@ -16,6 +16,7 @@ from fastapi_mail import MessageSchema, FastMail
 import redis.asyncio as redis
 from oauth2 import get_current_tenant
 from config import limiter
+from tasks import send_email
 
 templates = Jinja2Templates(directory="../frontend")
 
@@ -83,16 +84,13 @@ async def sendotp(request: Request,
     new_otp.expires_at = expires_at
     await db.commit()
     # try
-    message = MessageSchema(subject="Your OTP code for verification",recipients=[email.email],
-    body=
-    f"""Your One-Time Password (OTP) is: {otp}
+    subject="Your OTP code for verification"
+    body=f"""Your One-Time Password (OTP) is: {otp}
     This code will expire in 5 minutes.
     Do not share this code with anyone. 
     Our team will never ask for your OTP.
     If you did not request this, please ignore this email."""
-    ,subtype="plain")
-    fm = FastMail(conf)
-    await fm.send_message(message)
+    send_email(email.email, subject, body)
     return {"message": "OTP sent successfully"}
     # except Exception as e:
     #     raise HTTPException(status_code=503, detail=str(e))
