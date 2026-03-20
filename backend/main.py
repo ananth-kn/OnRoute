@@ -6,8 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
 from fastapi.templating import Jinja2Templates
 from oauth2 import get_current_tenant
-# from routers import user, auth, doctor, slot, appointment, patient
-# import models
+import os
 from routers import tenants, auth, drivers, customers, deliveries, ws
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -26,15 +25,23 @@ from config import limiter
 templates = Jinja2Templates(directory="../frontend")
 
 @asynccontextmanager
-async def lifespan(app):
-    task = asyncio.create_task(run_every_5_min())
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
-    task.cancel()
 
 app = FastAPI(lifespan=lifespan)
+
 app.state.limiter = limiter
 
-import os
+from database import Base, engine
+import models
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 from pathlib import Path
@@ -43,8 +50,6 @@ app.mount(
     StaticFiles(directory=Path(__file__).parent.parent / "frontend" / "static"),
     name="static"
 )
-
-
 
 
 async def run_every_5_min():
