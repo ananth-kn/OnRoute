@@ -27,11 +27,11 @@ r = redis.from_url(settings.redis_url, decode_responses=True)
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.my_gmail_name,
-    MAIL_PASSWORD= settings.gmail_app_password,
-    MAIL_FROM= settings.my_gmail_id,
-    MAIL_PORT=587,
+    MAIL_PASSWORD=settings.gmail_app_password,
+    MAIL_FROM=settings.my_gmail_id,
+    MAIL_PORT=465,
     MAIL_SERVER="smtp.gmail.com",
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=True
 )
 
