@@ -41,8 +41,8 @@ async def driver_location(websocket: WebSocket, customer_token: str, db: AsyncSe
     try:
         while True:
             await asyncio.sleep(1)
-            lat = (await r.get(f"{delivery.id}:lat")).decode()
-            lng = (await r.get(f"{delivery.id}:lng")).decode()
+            lat = (await r.get(f"{delivery.id}:lat"))
+            lng = (await r.get(f"{delivery.id}:lng"))
             await websocket.send_json({"lat": float(lat), "lng": float(lng)})
 
     except WebSocketDisconnect:
