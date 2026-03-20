@@ -1,19 +1,27 @@
 from config import conf, settings
 from fastapi_mail import MessageSchema, FastMail
 from fastapi import HTTPException
-import resend
-resend.api_key = settings.resend_api_key
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 def send_email(to: str, subject: str, body: str):
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = settings.brevo_api_key
+    
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+    
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": to}],
+        sender={"email": "newkairos.now@gmail.com", "name": "OnRoute"},
+        subject=subject,
+        text_content=body
+    )
+    
     try:
-        resend.Emails.send({
-        "from": "onboarding@resend.dev",
-        "to": to,
-        "subject": subject,
-        "text": body
-    })
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Email failed: {str(e)}")  
+        api_instance.send_transac_email(send_smtp_email)
+    except ApiException as e:
+        raise HTTPException(status_code=503, detail=f"Email failed: {str(e)}")
+     
 async def customer_link_email(to, token):
     subject="Successful registration"
     body=f'Location: localhost:8000/customers/{token}'

@@ -12,8 +12,6 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from config import conf, r
 import utils
-from fastapi_mail import MessageSchema, FastMail
-import redis.asyncio as redis
 from oauth2 import get_current_tenant
 from config import limiter
 from tasks import send_email
@@ -70,7 +68,6 @@ async def sendotp(request: Request,
     email: schemas.Email, db: AsyncSession = Depends(get_db)):
     num = (await r.get(f"otp@{email.email}"))
     num = 1 if not num else int(num)+1
-    print(num)
     if num>3:
         raise HTTPException(status_code=429, detail="Too many requests. Try again later") 
     await r.set(f"otp@{email.email}", num, ex=300)

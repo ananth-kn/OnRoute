@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     my_gmail_id: str
     my_gmail_name: str
     redis_url:str
-    resend_api_key:str
+    brevo_api_key:str
     model_config = {
         "env_file": ".env",
         "extra": "forbid"
