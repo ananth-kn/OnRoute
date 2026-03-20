@@ -30,10 +30,11 @@ const socket = new WebSocket(`${protocol}://${window.location.host}/ws/deliverie
 let delivery= null
 async function init() {
   delivery = await fetch(`/deliveries/drivers/{{driver_token}}`).then(r => r.json())
-  const locationlat = delivery.customer_lat
-  const locationlng = delivery.customer_lng
-
-  L.marker([locationlat, locationlng]).addTo(map)
+const locationlat = delivery.customer_lat !== null ? delivery.customer_lat : -1
+const locationlng = delivery.customer_lng !== null ? delivery.customer_lng : -1
+  if(locationlat !== -1){
+    L.marker([locationlat, locationlng]).addTo(map)
+  }
 }
 
 init()
