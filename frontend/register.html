@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="register">
+        <h1></h1>
+        <input type="text" placeholder="Business Name" id="name">
+        <input type="text" placeholder="Email Id" id="email">
+        <input type="text" placeholder="password" id="password">
+        <input type="text" placeholder="Enter OTP" id="otp" class="otphidden">
+        <button onclick="sendotp()" id="sendotp", class="sendotphidden">Send OTP</button>
+        <button onclick="register()" id="enter1", class="enter1hidden">Enter</button>
+        <div id="error1"></div>
+        <div id="success1"></div>
+        <button onclick="showlogin()">Login</button>
+    </div>
+    <div id="login">
+        <h1></h1>
+        <input type="text" placeholder="Email Id" id="loginemail">
+        <input type="text" placeholder="password" id="loginpassword">
+        <button onclick="login()">Enter</button>
+        <div id="error2"></div>
+        <button onclick="showregister()">Register</button>
+    </div>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f9f9f9;
+            color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #register button, #login button {
+            width: 100%;
+        }
+        #login {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 360px;
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        #register {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 360px;
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: fit-content;
+        }
+        .alert-error {
+            background: #ffe5e5;
+            color: #b00020;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .alert-success {
+            background: #e6f4ea;
+            color: #1e7e34;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+    </style>
+        <script>
+        function showsuccess1(msg){
+            const el =document.getElementById("success1")
+            el.style.display="block"
+            el.className = 'alert-success'
+            el.innerText= msg
+        }
+        function showerror1(msg){
+            const el =document.getElementById("error1")
+            el.style.display="block"
+            el.className = 'alert-error'
+            el.innerText= msg
+        }
+        function showerror2(msg){
+            const el =document.getElementById("error2")
+            el.style.display="block"
+            el.className = 'alert-error'
+            el.innerText= msg
+        }
+        function hidesuccess1(msg){
+            const el =document.getElementById("success1")
+            el.style.display="none"
+        }
+        function hideerror1(msg){
+            const el =document.getElementById("error1")
+            el.style.display="none"
+        }
+        function hideerror2(msg){
+            const el =document.getElementById("error2")
+            el.style.display="none"
+        }
+        hideerror1()
+        hideerror2()
+        hidesuccess1()
+        document.getElementById("register").style.display = "none"
+        document.getElementById("enter1").style.display = "none"
+        document.getElementById("name").style.display = "none"
+        document.getElementById("password").style.display = "none"
+        document.getElementById("otp").style.display = "none"
+        function showlogin(){
+            document.getElementById("register").style.display = "none"
+            document.getElementById("login").style.display = "flex"
+        }
+        function showregister(){
+            document.getElementById("register").style.display = "flex"   
+            document.getElementById("login").style.display = "none"
+        }
+        async function sendotp(){
+            const otp = await fetch('/auth/otp', {
+            method: 'GET'})
+        }
+        let setRegister = true
+        let email =""
+        async function sendotp(){
+            hideerror1()
+            email = document.getElementById("email").value
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            console.log(typeof name, name, typeof name.length, name.length)
+
+            if (!emailRegex.test(email)) {
+                showerror1("Invalid email")
+                return
+            }
+            showsuccess1("Sending OTP...")
+            const otp = await fetch('/auth/otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({email:email})
+            })
+            if(otp.status===429){
+                showerror1("Too may attempts! Try again later")
+                hidesuccess1()
+            }
+            else if(!otp.ok){
+                showerror1("Counld'nt send OTP, Try again")
+                document.getElementById("sendotp").innerText="Re-send OTP"
+            }
+            else{
+                document.getElementById("sendotp").innerText="Re-send OTP"
+                document.getElementById("enter1").style.display = "block"
+                document.getElementById("name").style.display = "block"
+                document.getElementById("password").style.display = "block"
+                document.getElementById("otp").style.display = "block"
+                document.getElementById("email").style.display = "none"
+                showsuccess1("OTP sent successfully!")
+
+            }
+            return 
+        }
+        async function register(){
+            hidesuccess1()
+            const name = document.getElementById("name").value
+            const password = document.getElementById("password").value
+            const otp = document.getElementById("otp").value
+            if(name.length === 0){
+                showerror1("Name is required")
+                return
+            }
+            if(password.length < 4){
+                showerror1("Password too short")
+                return
+            }
+            if(otp.length !== 6){
+                showerror1("OTP not valid")
+                return
+            }
+            console.log(email)
+            const res = await fetch('/tenants/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, otp: otp, password: password, email: email})
+            })
+            console.log(res, res.ok)
+            if(!res.ok){
+                const err = await res.json()
+                showerror1(err.detail)
+                return
+            }
+            const formData = new URLSearchParams()
+            formData.append("username", email)
+            formData.append("password", password)
+
+            const result = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData
+            })         
+            if(!res.ok){
+                const err = await result.json()
+                showerror1(err.detail)
+                return
+            }
+            window.location.replace("/dashboard")
+
+        }
+        async function login(){
+            let email = document.getElementById("loginemail").value
+            email = email.trim()
+            console.log(email)
+            const password = document.getElementById("loginpassword").value
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(email)) {
+                console.log("LE")
+                showerror2("Invalid email")
+                return
+            }
+            if(password.length < 1){
+                showerror2("Password is required")
+                return
+            }
+            const formData = new URLSearchParams()
+            formData.append("username", email)
+            formData.append("password", password)
+
+            const res = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData
+            })         
+            if(!res.ok){
+                const err = await res.json()
+                showerror2(err.detail)
+                return
+            }
+            window.location.replace("/dashboard")
+
+        }
+    </script>
+</body>
+</html>

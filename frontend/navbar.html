@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="logout()" id="logout">Logout</button>
+    <hr>
+    <style>
+        #logout{
+            background: none;
+            border: none;
+            padding: 10px;
+            color: black;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #logout:hover{
+            color: #444;
+            background: none;
+        }
+        hr {
+            border: none;
+            border-top: 2px solid #eee;
+        }
+    </style>
+    <script>
+        async function logout(){
+            await fetch("/auth/logout", {
+            method: "POST",
+            credentials: "include"
+            })
+            window.location.replace("/auth/login")
+        }
+    </script>
+</body>
+</html>

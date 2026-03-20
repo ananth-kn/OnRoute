@@ -1,0 +1,420 @@
+{% include "navbar.html" %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="page">
+        <div id="DriverPage">
+            <button id="addDriverBtn">Add Driver</button>
+            <h2>Your drivers</h2>
+            <input type="search" id="search1" placeholder="Search by Name">
+            <div id="drivers-list"></div>
+        </div>
+        <div id="modal1" class="hidden1">
+            <div class="modal1-content">
+                <input id="name" placeholder="Name">
+                <input id="email" placeholder="email">
+                <div id="error1"></div>
+                <button id="saveDriver" onclick="savebtn1()">Save</button>
+                <button id="closeModal1">Close</button>
+            </div>
+        </div>
+        <div class="vline"></div>
+        <div id="DeliveryPage">
+            <button id="addDeliveryBtn">Add Delivery</button>
+            <h2>Your deliveries</h2>
+            <div>
+                <span>Search by: </span>
+                <input class="filter-input" id="filter-input1" type="text" placeholder=" Driver ID">
+                <input class="filter-input" id="filter-input2" type="text" placeholder="Customer">
+                <input class="filter-input" id="filter-input3" type="text" placeholder="  Status">
+
+            </div>
+            <div id="deliveries-list"></div>
+        </div>
+        <div id="modal2" class="hidden2">
+            <div class="modal2-content">
+                <input id="driverID" placeholder="Driver ID">
+                <input id="customername" placeholder="Customer name">
+                <input id="customeremail" placeholder="Customer email">
+                <input id="notes" placeholder="Notes">
+                <div id="error2" style="color: red;"></div>
+                <button id="saveDelivery" onclick="savebtn2()">Save</button>
+                <button id="closeModal2">Close</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        * {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #f9f9f9;
+    color: #111;
+}
+
+#page {
+    display: flex;
+    gap: 40px;
+    margin: 40px;
+    height: 100vh;
+}
+
+#DriverPage, #DeliveryPage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+h2 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+span{
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+@media (max-width: 768px) {
+    span {
+        display: block;
+        margin-bottom: 10px;
+    }
+}
+button {
+    padding: 8px 16px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: fit-content;
+    transition: all 0.2s ease;
+}
+button:hover{
+    background: #444;
+}
+
+input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    outline: none;
+}
+.filter-input{
+    width: 86px;
+    margin-top: 0px;
+    font-size: 13px;
+}
+
+.driver, .deliveries {
+    padding: 12px 0;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #eee;
+}
+
+.vline {
+    width: 2px;
+    background: #eee;
+    align-self: stretch;
+}
+
+.modal1-content, .modal2-content {
+    width: 400px;
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+#modal1, #modal2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+#modal1.hidden1, #modal2.hidden2 {
+    display: none;
+}
+
+#closeModal1, #closeModal2 {
+    background: transparent;
+    color: #111;
+    border: 1px solid #ddd;
+    margin-top: 8px;
+}
+.alert-error {
+    background: #ffe5e5;
+    color: #b00020;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+.alert-success {
+    background: #e6f4ea;
+    color: #1e7e34;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+    </style>
+    <script>
+        drivers()
+        deliveries()
+        function showerror2(msg){
+            const el =document.getElementById("error2")
+            el.className = 'alert-error'
+            el.innerText= msg
+        }
+        function showerror1(msg){
+            const el =document.getElementById("error1")
+            el.className = 'alert-error'
+            el.innerText= msg
+        }
+        const modal = document.getElementById("modal1")
+        document.getElementById("closeModal1").onclick = () => {
+            modal.classList.add("hidden1")
+            document.getElementById("name").value = ""
+            document.getElementById("email").value = ""
+        }
+        document.getElementById("addDriverBtn").onclick = () => {
+            modal.classList.remove("hidden1")
+        }
+        document.getElementById("filter-input1").addEventListener("input", function() {
+            console.log("Enter")
+            deliveries()
+        
+        })
+        document.getElementById("filter-input2").addEventListener("input", function() {
+            console.log("Enter")
+            deliveries()
+        
+        })
+        document.getElementById("filter-input3").addEventListener("input", function() {
+            console.log("Enter")
+            deliveries()
+        
+        })
+
+        async function savebtn1() {
+            const name = document.getElementById("name").value
+            const email = document.getElementById("email").value
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (name.length === 0) {
+                showerror1("Name is required")
+                return
+            }
+            if (email.length === 0) {
+                showerror1("Email is required")
+                return
+            }
+            if (!emailRegex.test(email)) {
+                showerror1("Invalid email")
+                return
+            }
+
+            const res = await fetch("/tenants/drivers", {
+                method: "POST", headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, email: email }), credentials: "include"
+            })
+            if (res.status === 401) {
+                const refresh = await fetch("/auth/refresh", {method: "POST", credentials:"include"})
+                if(refresh.ok){
+                    savebtn1()
+                }
+            }
+            drivers()
+            modal1.classList.add("hidden1")
+            document.getElementById("name").value = ""
+            document.getElementById("email").value = ""
+        }
+
+        const modal2 = document.getElementById("modal2")
+        document.getElementById("closeModal2").onclick = () => {
+            modal2.classList.add("hidden2")
+            document.getElementById("driverID").value = ""
+            document.getElementById("customername").value = ""
+            document.getElementById("customeremail").value = ""
+            document.getElementById("notes").value = ""
+        }
+        document.getElementById("addDeliveryBtn").onclick = () => {
+            modal2.classList.remove("hidden2")
+        }
+        async function savebtn2() {
+            console.log("HI")
+            const val = document.getElementById("driverID").value
+            const driver_id = Number(val)
+            const customername = document.getElementById("customername").value
+            const customeremail = document.getElementById("customeremail").value
+            const notes = document.getElementById("notes").value
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (val.length === 0) {
+                showerror2("ID is required")
+                return
+            }
+            if (customername.length === 0) {
+                showerror2("Name is required")
+                return
+            }
+            if (customeremail.length === 0) {
+                showerror2("Email is required")
+                return
+            }
+            if(!Number.isInteger(driver_id)){
+                showerror2("Driver ID must be an integer")
+                return
+            }
+            if (!emailRegex.test(customeremail)) {
+                showerror2("Invalid email")
+                return
+            }
+            console.log("before fetch")
+
+            const res = await fetch("/tenants/deliveries", {
+                method: "POST", headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ driver_id: driver_id, customer_name: customername, customer_email: customeremail, notes: notes}), credentials: "include"
+            })
+            console.log("after fetch")
+            if (res.status === 401) {
+                console.log("inside refresh")
+                const refresh = await fetch("/auth/refresh", {method: "POST", credentials:"include"})
+                if(refresh.ok){
+                    console.log("refresh done")
+                    savebtn2()
+                }
+            }
+            else if(res.status === 404){
+                console.log("404")
+                showerror2("Driver doesnt exist")
+            }
+            else if(res.status === 403){
+                console.log("403")
+                showerror2("Driver is not active")
+            }
+            else{
+                console.log("Final else")
+                modal2.classList.add("hidden2")
+                document.getElementById("driverID").value = ""
+                document.getElementById("customername").value = ""
+                document.getElementById("customeremail").value = ""
+                document.getElementById("notes").value = ""
+                deliveries()
+                console.log("DOne")
+            }
+
+        }
+        async function driverState(id, is_active){
+            const res = await fetch(`/tenants/drivers/${id}`, {method: "PATCH", credentials:"include",headers: {"Content-Type": "application/json"}, body: JSON.stringify({is_active: is_active})})
+            if (res.status === 401) {
+                const refresh = await fetch("/auth/refresh", {method: "POST", credentials:"include"})
+                if(refresh.ok){
+                    console.log("OK")
+                    driverState(id, is_active)
+                }
+            }
+            else{
+                if(is_active){
+                    document.getElementById(`deactivatebtn${id}`).innerText="Activate"
+                }
+                else{
+                    document.getElementById(`deactivatebtn${id}`).innerText="Deactivate"
+                }
+            }
+            drivers()
+            return
+        }
+        async function drivers() {
+            const search = document.getElementById("search1").value
+            const d = await fetch(`/tenants/drivers?search=${search}`, { method: "GET", credentials: "include" })
+            if (d.status === 401) {
+                const refresh = await fetch("/auth/refresh", {method: "POST", credentials:"include"})
+                if(refresh.ok){
+                    drivers()
+                }
+            }
+            let drivers = await d.json()
+            const container = document.getElementById("drivers-list")
+            console.log(drivers, drivers)
+            container.innerHTML = drivers.map(d => `
+        <div class="driver">
+            <p>ID: ${d.id}<p>
+            <p>Name: ${d.name}</p>
+            <p>Email: ${d.email}</p>
+            <p>Status: ${d.is_active ? "Active" : "Inactive"}
+            <p>Created at: ${new Date(d.created_at).toLocaleString("en-IN", {dateStyle: "medium",timeStyle: "short"})}</p>
+            <button id="deactivatebtn${d.id}" onclick="driverState(${d.id}, ${d.is_active})">${d.is_active ? "Deactivate" : "Activate"}</button>
+            </div>
+        <hr>
+        `).join("")
+        }
+        drivers()
+        async function deliveries() {
+            const driver_id= document.getElementById("filter-input1").value
+            const customer= document.getElementById("filter-input2").value
+            const status= document.getElementById("filter-input3").value
+            console.log("id", driver_id)
+            const params = new URLSearchParams()
+            if (driver_id) params.append("driver_id", driver_id)
+            if (customer) params.append("customer", customer)
+            if (status) params.append("status", status)
+            const d = await fetch(`/tenants/deliveries?${params.toString()}`, { method: "GET", credentials: "include" })
+            if (d.status === 401) {
+                console.log("in")
+                const refresh = await fetch("/auth/refresh", {method: "POST", credentials:"include"})
+                if(refresh.ok){
+                    deliveries()
+                }
+            }
+            let deliveries = await d.json()
+            const container = document.getElementById("deliveries-list")
+            container.innerHTML = deliveries.map(d => `
+        <div class="deliveries">
+            <p>Delivery ID: ${d.id}
+            <p>Driver ID: ${d.driver_id}.</p>
+            <p>Customer Name: ${d.customer_name}</p>
+            <p>Customer Email: ${d.customer_email}</p>
+            <p>Latitude: ${d.customer_lat} Longitude: ${d.customer_lng}</p>
+            <p>Status: ${d.status}</p>
+            <p>Notes: ${d.notes}</p>
+            <p>Created at: ${new Date(d.created_at).toLocaleString("en-IN", {dateStyle: "medium",timeStyle: "short"})}</p>
+        </div>
+        <hr>
+        `).join("")
+        }
+        deliveries()
+
+    </script>
+</body>
+
+</html>

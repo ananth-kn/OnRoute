@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <style>
+  #map { height: 100vh; width: 100%; }
+</style>
+
+<script>
+  const map = L.map('map').setView([12.9716, 77.5946], 13) // Bangalore default
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{  maxZoom: 20,  detectRetina: true}).addTo(map)
+const driverIcon = L.icon({iconUrl: "/static/car.png",iconSize: [40, 40],iconAnchor: [20, 40]})
+const marker = L.marker([12.9716, 77.5946], {icon:driverIcon}).addTo(map)
+const socket = new WebSocket(`ws://${window.location.host}/ws/delivery/driver/{{driver_token}}`)
+
+let delivery= null
+async function init() {
+  delivery = await fetch(`/deliveries/drivers/{{driver_token}}`).then(r => r.json())
+  const locationlat = delivery.customer_lat
+  const locationlng = delivery.customer_lng
+
+  L.marker([locationlat, locationlng]).addTo(map)
+}
+
+init()
+
+let routeDrawn = false
+
+navigator.geolocation.watchPosition(async (position) => {
+  const lat = position.coords.latitude
+  const lng = position.coords.longitude
+  marker.setLatLng([lat, lng])
+  if (!routeDrawn) {
+    const custLat = delivery.customer_lat
+    const custLng = delivery.customer_lng
+    const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${custLng},${custLat}?overview=full&geometries=geojson`
+    const routeData = await fetch(url).then(r => r.json())
+    console.log(routeData)
+    const coords = routeData.routes[0].geometry.coordinates
+    const route = coords.map(p => [p[1], p[0]])
+    L.polyline(route, {color:"blue", weight:4}).addTo(map)
+    routeDrawn = true
+  }
+  socket.send(JSON.stringify({ lat, lng }))
+
+})
+</script>
+</body>
+
+</html>
