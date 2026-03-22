@@ -25,7 +25,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{  
 const driverIcon = L.icon({iconUrl: "/static/car.png",iconSize: [40, 40],iconAnchor: [20, 40]})
 const marker = L.marker([12.9716, 77.5946], {icon:driverIcon}).addTo(map)
 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-const socket = new WebSocket(`${protocol}://${window.location.host}/ws/deliveries/customers/${token}`);
+const socket = new WebSocket(`${protocol}://${window.location.host}/ws/deliveries/drivers/${token}`);
 console.log(socket)
 let delivery= null
 async function init() {
@@ -50,18 +50,23 @@ navigator.geolocation.watchPosition(async (position) => {
   const lng = position.coords.longitude
   console.log(lat)
   marker.setLatLng([lat, lng])
-  if (!routeDrawn) {
-    const custLat = delivery.customer_lat
-    const custLng = delivery.customer_lng
-    const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${custLng},${custLat}?overview=full&geometries=geojson`
-    const routeData = await fetch(url).then(r => r.json())
-    console.log(routeData)
-    const coords = routeData.routes[0].geometry.coordinates
-    const route = coords.map(p => [p[1], p[0]])
-    L.polyline(route, {color:"blue", weight:4}).addTo(map)
-    routeDrawn = true
-  }
   socket.send(JSON.stringify({ lat, lng }))
+  if (!routeDrawn) {
+      try {
+          const custLat = delivery.customer_lat
+          const custLng = delivery.customer_lng
+          if (custLat && custLng) {
+              const url = `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${custLng},${custLat}?overview=full&geometries=geojson`
+              const routeData = await fetch(url).then(r => r.json())
+              const coords = routeData.routes[0].geometry.coordinates
+              const route = coords.map(p => [p[1], p[0]])
+              L.polyline(route, {color:"blue", weight:4}).addTo(map)
+              routeDrawn = true
+          }
+      } catch(e) {
+          console.error("OSRM error", e)
+      }
+  }  
 },
   (error) => {
     console.error("geolocation error", error.code, error.message)
