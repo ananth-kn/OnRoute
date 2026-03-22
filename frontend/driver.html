@@ -26,10 +26,12 @@ const driverIcon = L.icon({iconUrl: "/static/car.png",iconSize: [40, 40],iconAnc
 const marker = L.marker([12.9716, 77.5946], {icon:driverIcon}).addTo(map)
 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
 const socket = new WebSocket(`${protocol}://${window.location.host}/ws/deliveries/customers/${token}`);
-
+console.log(socket)
 let delivery= null
 async function init() {
-  delivery = await fetch(`/deliveries/drivers/{{driver_token}}`).then(r => r.json())
+  delivery = await fetch(`/deliveries/drivers/{{driver_token}}`)
+  
+  delivery = await delivery.json()
 const locationlat = delivery.customer_lat !== null ? delivery.customer_lat : -1
 const locationlng = delivery.customer_lng !== null ? delivery.customer_lng : -1
   if(locationlat !== -1){
@@ -40,10 +42,13 @@ const locationlng = delivery.customer_lng !== null ? delivery.customer_lng : -1
 init()
 
 let routeDrawn = false
-
+console.log("watchPosition registered")
 navigator.geolocation.watchPosition(async (position) => {
+  console.log("inside")
+  console.log("socket state", socket.readyState)
   const lat = position.coords.latitude
   const lng = position.coords.longitude
+  console.log(lat)
   marker.setLatLng([lat, lng])
   if (!routeDrawn) {
     const custLat = delivery.customer_lat
@@ -57,8 +62,10 @@ navigator.geolocation.watchPosition(async (position) => {
     routeDrawn = true
   }
   socket.send(JSON.stringify({ lat, lng }))
-
-})
+},
+  (error) => {
+    console.error("geolocation error", error.code, error.message)
+  })
 </script>
 </body>
 
