@@ -14,6 +14,6 @@ router = APIRouter(prefix="/drivers")
 async def driver_page(request: Request, driver_token: str, db: AsyncSession = Depends(get_db)):
     delivery = (await db.execute(select(models.Delivery).where(models.Delivery.driver_token == driver_token))).scalars().first()
     if not delivery:
-            return {"message": "Page not found"}
+        return {"message": "Page not found"}
     return templates.TemplateResponse("driver.html", {"request": request, "driver_token": driver_token})
 
