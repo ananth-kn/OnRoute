@@ -6,7 +6,6 @@ import redis.asyncio as redis
 
 limiter = Limiter(key_func=get_remote_address)
 class Settings(BaseSettings):
-
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
@@ -18,6 +17,7 @@ class Settings(BaseSettings):
     my_gmail_name: str
     redis_url:str
     brevo_api_key:str
+    local: bool
     model_config = {
         "env_file": ".env",
         "extra": "forbid"
