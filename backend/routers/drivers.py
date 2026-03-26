@@ -1,14 +1,9 @@
-from fastapi import APIRouter, HTTPException, Form, File, UploadFile, Depends, WebSocket, WebSocketDisconnect, Request
-import redis.asyncio as redis
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, DataError
 from sqlalchemy import select
 from database import get_db
-from oauth2 import get_current_tenant
-import models, schemas, utils, oauth2
-from typing import List
-from uuid import UUID
 from fastapi.templating import Jinja2Templates
+import models
 templates = Jinja2Templates(directory="../frontend")
 
 router = APIRouter(prefix="/drivers")
@@ -16,6 +11,9 @@ router = APIRouter(prefix="/drivers")
 
 
 @router.get("/map/{driver_token}")
-async def driver_page(request: Request, driver_token: str):
+async def driver_page(request: Request, driver_token: str, db: AsyncSession = Depends(get_db)):
+    delivery = (await db.execute(select(models.Delivery).where(models.Delivery.driver_token == driver_token))).scalars().first()
+    if not delivery:
+            return {"message": "Page not found"}
     return templates.TemplateResponse("driver.html", {"request": request, "driver_token": driver_token})
 
