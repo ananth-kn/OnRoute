@@ -15,6 +15,8 @@ router = APIRouter(prefix="/deliveries")
 @router.get("/customers/{token}", response_model= schemas.DeliveryResponse)
 async def get_deliveries(token: str, db: AsyncSession = Depends(get_db)):
     delivery = (await db.execute(select(models.Delivery).where(models.Delivery.customer_token == token))).scalars().first()
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Delivery not found") 
     return delivery
 
 @router.get("/drivers/{token}", response_model= schemas.DeliveryResponse)
