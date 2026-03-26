@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
@@ -9,8 +9,8 @@ from database import get_db
 from config import settings
 from fastapi.templating import Jinja2Templates
 import secrets
-from datetime import datetime, timedelta, timezone
-from config import conf, r
+from datetime import timedelta
+from config import r
 import utils
 from oauth2 import get_current_tenant
 from config import limiter
@@ -80,15 +80,15 @@ async def sendotp(request: Request,
     expires_at = new_otp.created_at + timedelta(minutes=5)
     new_otp.expires_at = expires_at
     await db.commit()
-    # try
-    subject="Your OTP code for verification"
-    body=f"""Your One-Time Password (OTP) is: {otp}
-    This code will expire in 5 minutes.
-    Do not share this code with anyone. 
-    Our team will never ask for your OTP.
-    If you did not request this, please ignore this email."""
-    send_email(email.email, subject, body)
-    return {"message": "OTP sent successfully"}
-    # except Exception as e:
-    #     raise HTTPException(status_code=503, detail=str(e))
+    try:
+        subject="Your OTP code for verification"
+        body=f"""Your One-Time Password (OTP) is: {otp}
+        This code will expire in 5 minutes.
+        Do not share this code with anyone. 
+        Our team will never ask for your OTP.
+        If you did not request this, please ignore this email."""
+        send_email(email.email, subject, body)
+        return {"message": "OTP sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
     
